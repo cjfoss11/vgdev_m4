@@ -9,23 +9,50 @@ public class MinionAI : MonoBehaviour
     public UnityEngine.AI.NavMeshAgent nav;
     private Animator anim;
     public GameObject[] waypoints;
+    public GameObject movingWaypoint;
     int currWaypoint;
+    public enum AIState
+    {
+        Patrol,
+        ChaseWaypoint
+    };
+    public AIState aiState;
+
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animator>();
         nav = GetComponent<UnityEngine.AI.NavMeshAgent>();
         currWaypoint = -1;
-
+        aiState = AIState.Patrol;
         setNextWaypoint();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!nav.pathPending && nav.remainingDistance <= 2)
+        anim.SetFloat("vely", nav.velocity.magnitude / nav.speed);
+
+        switch(aiState)
         {
-            setNextWaypoint();
+            case AIState.Patrol:
+                if (currWaypoint == waypoints.Length - 1)
+                {
+                    currWaypoint = 0;
+                    aiState = AIState.ChaseWaypoint;
+                } else
+                {
+                    if (!nav.pathPending && nav.remainingDistance <= 2)
+                    {
+                        setNextWaypoint();
+                    }
+                }
+                break;
+            case AIState.ChaseWaypoint:
+                movingWaypoint.GetComponent<VelocityReporter>();
+                break;
+            default:
+                break;
         }
     }
 
@@ -33,15 +60,7 @@ public class MinionAI : MonoBehaviour
     {
         if (waypoints.Length > 0)
         {
-            if (currWaypoint == waypoints.Length - 1)
-            {
-                currWaypoint = 0;
-            }
-            else
-            {
-                currWaypoint = currWaypoint + 1;
-            }
-
+            currWaypoint = currWaypoint + 1;
             nav.SetDestination(waypoints[currWaypoint].transform.position);
         }
        
