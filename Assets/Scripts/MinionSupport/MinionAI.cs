@@ -11,6 +11,7 @@ public class MinionAI : MonoBehaviour
     public GameObject[] waypoints;
     public GameObject movingWaypoint;
     int currWaypoint;
+    VelocityReporter velocityReporter;
     public enum AIState
     {
         Patrol,
@@ -25,6 +26,7 @@ public class MinionAI : MonoBehaviour
         nav = GetComponent<UnityEngine.AI.NavMeshAgent>();
         currWaypoint = -1;
         aiState = AIState.Patrol;
+        Debug.Log(waypoints.Length);
         setNextWaypoint();
     }
 
@@ -38,7 +40,7 @@ public class MinionAI : MonoBehaviour
             case AIState.Patrol:
                 if (currWaypoint == waypoints.Length - 1)
                 {
-                    currWaypoint = 0;
+                    currWaypoint = -1;
                     aiState = AIState.ChaseWaypoint;
                 } else
                 {
@@ -49,7 +51,16 @@ public class MinionAI : MonoBehaviour
                 }
                 break;
             case AIState.ChaseWaypoint:
-                movingWaypoint.GetComponent<VelocityReporter>();
+                velocityReporter = movingWaypoint.GetComponent<VelocityReporter>();
+                float distance = (movingWaypoint.transform.position - nav.transform.position).magnitude;
+                float lookAheadT = distance / nav.speed;
+                Vector3 futureTarget = movingWaypoint.transform.position + lookAheadT * velocityReporter.velocity;
+
+                nav.SetDestination(futureTarget);
+                if (nav.remainingDistance <= 2)
+                {
+                    aiState = AIState.Patrol;
+                }
                 break;
             default:
                 break;

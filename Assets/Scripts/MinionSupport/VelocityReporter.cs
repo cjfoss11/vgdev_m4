@@ -34,8 +34,10 @@ public class VelocityReporter : MonoBehaviour
         }
         else
         {
-            rawVelocity = 0f;
-            velocity = 0f;
+            rawVelocity = new Vector3(0.0f, 0.0f, 0.0f);
+            velocity = new Vector3(0.0f, 0.0f, 0.0f);
+            //rawVelocity = 0f;
+            //velocity = 0f;
         }
         prevPos = this.transform.position;
     }
